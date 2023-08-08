@@ -1,4 +1,4 @@
-module github.com/axi92/netwoork-guard
+module github.com/axi92/network-guard
 
 go 1.20
 
