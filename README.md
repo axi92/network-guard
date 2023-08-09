@@ -1,5 +1,21 @@
 # network-guard
-Scans the network for not whitelisted devices.
+Scans the network for not whitelisted devices. The whitelist is either a whitelist.json file or with the param -whitelistUrl a url from a webserver. I use git to store my whitelist. The whitelist from url is reloaded once per hour.
+
+This programm is intended to be use with prometheus and optional grafana to visualize the "not-whitelisted" devices in a network.
+
+# Usage
+
+```
+Usage of network-guard:
+  -bindAddress string
+        Address to bind the webserver for /metrics. Default empty = listening an all interfaces
+  -bindPort int
+        Port to bind the webserver for /metrics. Default 3000 (default 3000)
+  -interfaceName string
+        Network interface to scan. Example: enp38s0
+  -whitelistUrl string
+        Url to get the whitelist.json from, auth is not supported must be open. If this option is set the local whitelist.json will be ignored.
+```
 
 # Dependencies
 

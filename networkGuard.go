@@ -15,6 +15,7 @@ import (
 	"bytes"
 	"embed"
 	"encoding/binary"
+	"encoding/json"
 	"errors"
 	"flag"
 	"fmt"
@@ -41,13 +42,21 @@ type device struct {
 	whitelisted bool   // if true it has bin checked and is ok
 }
 
+type WebJson []struct {
+	IP  string `json:"ip"`
+	Mac string `json:"mac"`
+}
+
 // var devices map[string]device
 // m :=       make(map[string]float64)
 var devices = make(map[string]device)
 var bindAddress string
 var bindPort int
 var interfaceName string
-var removeAfterLastseen int64 // in seconds
+var whitelistUrl string
+var removeAfterLastseen int64                         // in seconds
+var whitelistLoadingInterval int64 = 3600             // in seconds 3600s = 1h
+var whitelistLastTimeLoaded int64 = time.Now().Unix() // timestamp
 
 //go:embed src
 var fsEmbed embed.FS
@@ -57,14 +66,23 @@ var whitelistReadError error
 
 var mutex = &sync.Mutex{}
 
+var myClient = &http.Client{Timeout: 10 * time.Second}
+
 func init() {
 	flag.StringVar(&interfaceName, "interfaceName", "", "Network interface to scan. Example: enp38s0")
 	flag.StringVar(&bindAddress, "bindAddress", "", "Address to bind the webserver for /metrics. Default empty = listening an all interfaces")
+	flag.StringVar(&whitelistUrl, "whitelistUrl", "", "Url to get the whitelist.json from, auth is not supported must be open. If this option is set the local whitelist.json will be ignored.")
 	flag.IntVar(&bindPort, "bindPort", 3000, "Port to bind the webserver for /metrics. Default 3000")
 	flag.Parse()
-	whitelistData, whitelistReadError = os.ReadFile("whitelist.json")
-	check(macReadError)
+	fmt.Println(whitelistUrl)
+	if whitelistUrl != "" {
+		loadWhitelist()
+	} else {
+		whitelistData, whitelistReadError = os.ReadFile("whitelist.json")
+		fmt.Println("Whitelist loaded from file")
+	}
 	check(whitelistReadError)
+	check(macReadError)
 	removeAfterLastseen = 2 * 60
 }
 
@@ -178,7 +196,6 @@ func readARP(handle *pcap.Handle, iface *net.Interface, stop chan struct{}) {
 			// Note:  we might get some packets here that aren't responses to ones we've sent,
 			// if for example someone else sends US an ARP request.  Doesn't much matter, though...
 			// all information is good information :)
-			// devices = append(devices, device{ip: net.IP(arp.SourceProtAddress), mac: net.HardwareAddr(arp.SourceHwAddress)})
 			// Get Mac information
 			result := gjson.Get(string(macData), "#(macPrefix=="+strings.ToUpper(fmt.Sprint(net.HardwareAddr(arp.SourceHwAddress)[:3])+")"))
 			var vendor string
@@ -223,6 +240,10 @@ func readARP(handle *pcap.Handle, iface *net.Interface, stop chan struct{}) {
 				}
 			}
 
+			if time.Now().Unix()-whitelistLoadingInterval > whitelistLastTimeLoaded {
+				whitelistLastTimeLoaded = time.Now().Unix()
+				loadWhitelist()
+			}
 		}
 	}
 }
@@ -327,4 +348,21 @@ func check(e error) {
 	if e != nil {
 		panic(e)
 	}
+}
+
+func getJson(url string, target interface{}) error {
+	r, err := myClient.Get(url)
+	if err != nil {
+		return err
+	}
+	// fmt.Printf("r.Body = %v\n", r.Body)
+	defer r.Body.Close()
+	return json.NewDecoder(r.Body).Decode(target)
+}
+
+func loadWhitelist() {
+	data := new(WebJson) // or &WebJson{}
+	getJson(whitelistUrl, data)
+	fmt.Println("Whitelist loaded from url:", data)
+	whitelistData, whitelistReadError = json.Marshal(data)
 }
