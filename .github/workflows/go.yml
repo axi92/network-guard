@@ -36,7 +36,7 @@ jobs:
     - name: Upload a Build Artifact
       uses: actions/upload-artifact@v3.1.2
       with:
-        name: linux-with-glibc2.35
+        name: linux-with-glibc2.35-ubuntu22
         path: network-guard
 
   build-ubuntu20:
@@ -64,7 +64,7 @@ jobs:
     - name: Upload a Build Artifact
       uses: actions/upload-artifact@v3.1.2
       with:
-        name: linux-with-glibc2.31
+        name: linux-with-glibc2.31-ubuntu20
         path: network-guard
 
   build-win:
