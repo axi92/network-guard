@@ -55,3 +55,9 @@ networkguard{ip="192.168.0.54", mac="00:00:00:00:00:00", vendor="Micro-Star INTL
 networkguard{ip="192.168.0.56", mac="00:00:00:00:00:00", vendor="Fujitsu Technology Solutions GmbH"} 1
 networkguard{ip="192.168.0.57", mac="00:00:00:00:00:00", vendor="VMware, Inc."} 1
 ```
+
+# Grafana dashboard
+
+![Dashbard](https://github.com/axi92/network-guard/blob/master/dashboard.png?raw=true)
+
+Dashboard config in grafana-dashboard.json
