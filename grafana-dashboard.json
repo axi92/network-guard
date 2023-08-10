@@ -26,7 +26,7 @@
   "graphTooltip": 0,
   "id": 14,
   "links": [],
-  "liveNow": false,
+  "liveNow": true,
   "panels": [
     {
       "datasource": {
@@ -95,20 +95,14 @@
           "exemplar": false,
           "expr": "networkguard{job=~\"$job\"} == 0",
           "format": "table",
-          "instant": true,
+          "instant": false,
           "legendFormat": "__auto",
-          "range": false,
+          "range": true,
           "refId": "A"
         }
       ],
       "title": "Not whitelisted Nodes",
       "transformations": [
-        {
-          "id": "seriesToColumns",
-          "options": {
-            "byField": "instance"
-          }
-        },
         {
           "id": "organize",
           "options": {
@@ -125,6 +119,25 @@
             },
             "indexByName": {},
             "renameByName": {}
+          }
+        },
+        {
+          "id": "groupBy",
+          "options": {
+            "fields": {
+              "ip": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "mac": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "vendor": {
+                "aggregations": [],
+                "operation": "groupby"
+              }
+            }
           }
         }
       ],
@@ -163,7 +176,7 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 17,
+        "h": 12,
         "w": 24,
         "x": 0,
         "y": 12
@@ -197,20 +210,14 @@
           "exemplar": false,
           "expr": "networkguard{job=~\"$job\"} == 1",
           "format": "table",
-          "instant": true,
+          "instant": false,
           "legendFormat": "__auto",
-          "range": false,
+          "range": true,
           "refId": "A"
         }
       ],
-      "title": "Whitelisted Nodes",
+      "title": "Whitelisted nodes",
       "transformations": [
-        {
-          "id": "seriesToColumns",
-          "options": {
-            "byField": "instance"
-          }
-        },
         {
           "id": "organize",
           "options": {
@@ -228,11 +235,31 @@
             "indexByName": {},
             "renameByName": {}
           }
+        },
+        {
+          "id": "groupBy",
+          "options": {
+            "fields": {
+              "ip": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "mac": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "vendor": {
+                "aggregations": [],
+                "operation": "groupby"
+              }
+            }
+          }
         }
       ],
       "type": "table"
     }
   ],
+  "refresh": "1m",
   "schemaVersion": 37,
   "style": "dark",
   "tags": [],
@@ -268,17 +295,28 @@
         "skipUrlSync": false,
         "sort": 5,
         "type": "query"
+      },
+      {
+        "datasource": {
+          "type": "prometheus",
+          "uid": "vMoURkn4k"
+        },
+        "filters": [],
+        "hide": 0,
+        "name": "Filters",
+        "skipUrlSync": false,
+        "type": "adhoc"
       }
     ]
   },
   "time": {
-    "from": "now-6h",
+    "from": "now-5m",
     "to": "now"
   },
   "timepicker": {},
   "timezone": "",
-  "title": "Whitelist",
+  "title": "Network Whitelist",
   "uid": "0G17nA64k",
-  "version": 3,
+  "version": 7,
   "weekStart": ""
 }
