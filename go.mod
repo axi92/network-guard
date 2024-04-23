@@ -12,6 +12,6 @@ require (
 require (
 	github.com/google/gopacket v1.1.19
 	github.com/hashicorp/go-version v1.6.0
-	golang.org/x/net v0.17.0 // indirect
-	golang.org/x/sys v0.13.0 // indirect
+	golang.org/x/net v0.23.0 // indirect
+	golang.org/x/sys v0.18.0 // indirect
 )
