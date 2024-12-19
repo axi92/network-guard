@@ -13,27 +13,26 @@ jobs:
   build:
     strategy:
       matrix:
-        os:
-          - ubuntu-20.04
-          - ubuntu-22.04
-          - ubuntu-24.04
-          - ubuntu-latest
-        GOOS:
-          - linux
-          - linux
-          - linux
-          - windows
-        artifactName:
-          - linux-with-glibc2.31-ubuntu20
-          - linux-with-glibc2.35-ubuntu22
-          - linux-with-glibc2.39-ubuntu24
-          - windows
-        artifactPath:
-          - network-guard
-          - network-guard
-          - network-guard
-          - network-guard.exe
-    runs-on: ${{ matrix.os }}
+        config:
+          - os: ubuntu-20.04
+            GOOS: linux
+            artifactName: linux-with-glibc2.31-ubuntu20
+            artifactPath: network-guard
+          - os: ubuntu-22.04
+            GOOS: linux
+            artifactName: linux-with-glibc2.35-ubuntu22
+            artifactPath: network-guard
+          - os: ubuntu-24.04
+            GOOS: linux
+            artifactName: linux-with-glibc2.39-ubuntu24
+            artifactPath: network-guard
+          - os: ubuntu-latest
+            GOOS: windows
+            artifactName: windows
+            artifactPath: network-guard.exe
+    runs-on: ${{ matrix.config.os }}
+    env:
+      GOOS: ""
     steps:
     - uses: actions/checkout@v3
     - name: Install libpcap-dev
@@ -45,9 +44,9 @@ jobs:
       with:
         go-version: 1.23.4
     - name: Build
-      run: GOOS=${{ matrix.GOOS }} GOARCH=amd64 go build -v ./...
+      run: GOOS=${{ matrix.config.GOOS }} GOARCH=amd64 go build -v ./...
     - name: Upload a Build Artifact
       uses: actions/upload-artifact@v3.1.2
       with:
-        name: ${{ matrix.artifactName }}
-        path: ${{ matrix.artifactPath }}
+        name: ${{ matrix.config.artifactName }}
+        path: ${{ matrix.config.artifactPath }}
