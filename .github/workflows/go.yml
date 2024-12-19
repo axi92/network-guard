@@ -10,87 +10,44 @@ on:
     branches: [ "main" ]
 
 jobs:
-
-  build-ubuntu22:
-    runs-on: ubuntu-22.04
+  build:
+    strategy:
+      matrix:
+        os:
+          - ubuntu-20.04
+          - ubuntu-22.04
+          - ubuntu-24.04
+          - ubuntu-latest
+        GOOS:
+          - linux
+          - linux
+          - linux
+          - windows
+        artifactName:
+          - linux-with-glibc2.31-ubuntu20
+          - linux-with-glibc2.35-ubuntu22
+          - linux-with-glibc2.39-ubuntu24
+          - windows
+        artifactPath:
+          - network-guard
+          - network-guard
+          - network-guard
+          - network-guard.exe
+    runs-on: ${{ matrix.os }}
     steps:
     - uses: actions/checkout@v3
-
     - name: Install libpcap-dev
       run: sudo apt install -y libpcap-dev
-
     - name: Fetch mac vendor db
       run: wget "https://maclookup.app/downloads/json-database/get-db" -O src/mac-vendors-export.json
-
     - name: Set up Go
       uses: actions/setup-go@v3
       with:
-        go-version: 1.20.7
-
+        go-version: 1.23.4
     - name: Build
-      run: go build -v ./...
-
-    - name: List dir for debug
-      run: ls -lha
-
+      run: GOOS=${{ matrix.GOOS }} GOARCH=amd64 go build -v ./...
     - name: Upload a Build Artifact
       uses: actions/upload-artifact@v3.1.2
       with:
-        name: linux-with-glibc2.35-ubuntu22
-        path: network-guard
-
-  build-ubuntu20:
-    runs-on: ubuntu-20.04
-    steps:
-    - uses: actions/checkout@v3
-
-    - name: Install libpcap-dev
-      run: sudo apt install -y libpcap-dev
-
-    - name: Fetch mac vendor db
-      run: wget "https://maclookup.app/downloads/json-database/get-db" -O src/mac-vendors-export.json
-
-    - name: Set up Go
-      uses: actions/setup-go@v3
-      with:
-        go-version: 1.20.7
-
-    - name: Build
-      run: go build -v ./...
-
-    - name: List dir for debug
-      run: ls -lha
-
-    - name: Upload a Build Artifact
-      uses: actions/upload-artifact@v3.1.2
-      with:
-        name: linux-with-glibc2.31-ubuntu20
-        path: network-guard
-
-  build-win:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v3
-
-    - name: Install libpcap-dev
-      run: sudo apt install -y libpcap-dev
-
-    - name: Fetch mac vendor db
-      run: wget "https://maclookup.app/downloads/json-database/get-db" -O src/mac-vendors-export.json
-
-    - name: Set up Go
-      uses: actions/setup-go@v3
-      with:
-        go-version: 1.20.7
-
-    - name: Build
-      run: GOOS=windows GOARCH=amd64 go build -v ./...
-
-    - name: List dir for debug
-      run: ls -lha
-
-    - name: Upload a Build Artifact
-      uses: actions/upload-artifact@v3.1.2
-      with:
-        name: windows
-        path: network-guard.exe
+        name: ${{ matrix.artifactName }}
+        path: ${{ matrix.artifactPath }}
