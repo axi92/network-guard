@@ -46,7 +46,7 @@ jobs:
     - name: Build
       run: GOOS=${{ matrix.config.GOOS }} GOARCH=amd64 go build -v ./...
     - name: Upload a Build Artifact
-      uses: actions/upload-artifact@v3.1.2
+      uses: actions/upload-artifact@v4.5.0
       with:
         name: ${{ matrix.config.artifactName }}
         path: ${{ matrix.config.artifactPath }}
